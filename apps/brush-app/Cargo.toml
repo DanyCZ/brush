@@ -77,7 +77,8 @@ winapi.workspace = true
 winit = { version = "0.30", features = ["android-game-activity"] }
 tokio = { workspace = true, features = ["io-util", "rt", "rt-multi-thread"] }
 android_logger = "0.15.0"
-jni = "0.22"
+# Pinned below 0.22 - see crates/rrfd/Cargo.toml for why.
+jni = "=0.21.1"
 
 # On WASM
 [target.'cfg(target_family = "wasm")'.dependencies]
