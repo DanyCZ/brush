@@ -16,10 +16,11 @@ jobs:
       # that. Extra swap is a well-known, low-risk mitigation for exactly this.
       - name: Add swap space
         run: |
-          sudo fallocate -l 8G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
+          sudo fallocate -l 8G /mnt/extra-swapfile
+          sudo chmod 600 /mnt/extra-swapfile
+          sudo mkswap /mnt/extra-swapfile
+          sudo swapon /mnt/extra-swapfile
+          free -h
 
       - uses: dtolnay/rust-toolchain@master
         with:
