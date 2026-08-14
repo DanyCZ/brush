@@ -1,0 +1,49 @@
+name: Build brush-c for Android
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: true
+
+      # Standard runners have ~7GB RAM; this workspace's dependency tree
+      # (wgpu/burn/cubecl) OOM'd rustc locally on a machine with more RAM than
+      # that. Extra swap is a well-known, low-risk mitigation for exactly this.
+      - name: Add swap space
+        run: |
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.95.0
+          targets: aarch64-linux-android
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: "v2"
+          shared-key: "brush-c-android"
+          cache-workspace-crates: true
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+
+      - name: Build brush-c for arm64-v8a
+        working-directory: apps/brush-c
+        env:
+          # Cap parallel rustc jobs to limit peak memory, at the cost of wall-clock time.
+          CARGO_BUILD_JOBS: "2"
+        run: cargo ndk -t arm64-v8a build --release
+
+      - name: Upload .so artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: libbrush_c-arm64-v8a
+          path: target/aarch64-linux-android/release/libbrush_c.so
