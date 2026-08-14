@@ -14,7 +14,11 @@ tokio = { workspace = true, features = ["fs", "sync", "io-util"] }
 rfd = "0.17"
 
 [target.'cfg(target_os = "android")'.dependencies]
-jni = "0.22"
+# Pinned below 0.22: that release split JNIEnv into Env/EnvUnowned, made
+# GlobalRef generic, and changed several method signatures (find_class,
+# get_static_method_id, attach_current_thread, get_env) - breaking changes
+# this crate's android.rs (last touched 2025-06) was never updated for.
+jni = "=0.21.1"
 lazy_static = "1.5.0"
 
 [target.'cfg(target_family = "wasm")'.dependencies]
