@@ -41,6 +41,12 @@ jobs:
         env:
           # Cap parallel rustc jobs to limit peak memory, at the cost of wall-clock time.
           CARGO_BUILD_JOBS: "2"
+          # Rust cdylibs get no DT_SONAME by default. Without one, a consumer that links against
+          # this .so by path (rather than -l search) has ld.lld fall back to embedding that raw
+          # path as the DT_NEEDED entry in the *caller's* binary - fine on the build machine,
+          # meaningless on-device. Setting this here fixes it at the source, in the file itself,
+          # rather than needing every consumer to work around a missing soname.
+          RUSTFLAGS: "-C link-arg=-Wl,-soname,libbrush_c.so"
         run: cargo ndk -t arm64-v8a build --release
 
       - name: Upload .so artifact
